@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ShelfQuest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Sora', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          deep: '#0b0f19',
+          panel: '#121826',
+          card: '#161e2e',
+          edge: '#232c3d',
+          brand: '#6366f1',
+          brand2: '#a855f7',
+          danger: '#ef4444',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-display { font-family: 'Sora', sans-serif; }
+
+  ::-webkit-scrollbar { width: 8px; height: 1px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #232c3d; border-radius: 8px; }
+
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .skeleton {
+    background: linear-gradient(90deg, #161e2e 25%, #1d2738 37%, #161e2e 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+</style>
+</head>
+<body class="bg-deep text-slate-100 min-h-screen antialiased">
+
+<script>
+  const BOOKS = {
+    b01: {
+      title: "The Marrow Atlas",
+      author: "Foster Lindqvist",
+      genre: "Sci-Fi",
+      pages: 376,
+      published: 2022,
+      rating: "★★★★☆",
+      ratingNum: "4.6",
+      gradient: "from-emerald-900 via-emerald-800 to-teal-600",
+      description: "A field surgeon assigned to a long-haul colony ship starts mapping a patient's body that keeps generating organs with no known function — and no known limit."
+    },
+    b02: {
+      title: "Paper Tide",
+      author: "Selin Marchetti",
+      genre: "Mystery",
+      pages: 302,
+      published: 2021,
+      rating: "★★★☆☆",
+      ratingNum: "3.5",
+      gradient: "from-amber-900 via-amber-800 to-orange-600",
+      description: "A small-town librarian starts receiving overdue notices for books that were never checked out, returned by no one, about events that haven't happened yet."
+    },
+    b03: {
+      title: "The Glass Apiary",
+      author: "Wren Castellan",
+      genre: "Fantasy",
+      pages: 392,
+      published: 2023,
+      rating: "★★★★☆",
+      ratingNum: "4.0",
+      gradient: "from-purple-900 via-purple-800 to-fuchsia-600",
+      description: "When a reclusive beekeeper's hives begin producing combs of glass instead of honey, the village's fortunes start changing with them — and so does the beekeeper."
+    },
+    b04: {
+      title: "Nine Days of Frost",
+      author: "Calla Vesik",
+      genre: "Thriller",
+      pages: 318,
+      published: 2020,
+      rating: "★★★★☆",
+      ratingNum: "4.5",
+      gradient: "from-slate-800 via-slate-700 to-red-700",
+      description: "A detective is given nine days — the legal window before a cold case closes for good — to prove a decade-old disappearance was never an accident."
+    },
+    b05: {
+      title: "The Cartographer's Oath",
+      author: "Mira Solenne",
+      genre: "Fantasy, Adventure",
+      pages: 412,
+      published: 2021,
+      rating: "★★★★★",
+      ratingNum: "4.8",
+      gradient: "from-indigo-900 via-indigo-800 to-violet-700",
+      description: "A mapmaker discovers that the borders on her oldest charts shift whenever no one is watching, leading her into a guild of cartographers who quietly redraw the world to keep it from tearing apart."
+    },
+    b06: {
+      title: "Static Bloom",
+      author: "Idris Achebe",
+      genre: "Sci-Fi",
+      pages: 328,
+      published: 2023,
+      rating: "★★★★☆",
+      ratingNum: "4.0",
+      gradient: "from-cyan-900 via-cyan-800 to-teal-600",
+      description: "On an abandoned signal relay drifting past Jupiter, a lone gardener keeps the station's last greenhouse alive — until a garbled transmission suggests Earth never lost contact at all."
+    },
+    b07: {
+      title: "Ferrous Hearts",
+      author: "Dalen Okoro",
+      genre: "Romance",
+      pages: 286,
+      published: 2022,
+      rating: "★★★☆☆",
+      ratingNum: "3.5",
+      gradient: "from-rose-900 via-rose-800 to-pink-700",
+      description: "After a flood collapses the only bridge connecting two feuding river towns, a stubborn blacksmith and a city engineer are forced to rebuild it together."
+    },
+    b08: {
+      title: "Whistling Fathoms",
+      author: "Lior Sand",
+      genre: "Adventure",
+      pages: 344,
+      published: 2021,
+      rating: "★★★★☆",
+      ratingNum: "4.5",
+      gradient: "from-sky-900 via-sky-800 to-cyan-700",
+      description: "A deep-water diver chasing an insurance bounty starts hearing a low, rhythmic whistle at depths no current should carry sound — and the company that hired her knows exactly what it is."
+    },
+  };
+</script>
+
+<header class="sticky top-0 z-30 backdrop-blur-md bg-deep/80 border-b border-edge/60">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5 shrink-0">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-brand shrink-0">
+        <path d="M4 4.5C4 3.67 4.67 3 5.5 3H11v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M20 4.5c0-.83-.67-1.5-1.5-1.5H13v18h5.5a1.5 1.5 0 0 0 1.5-1.5v-15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" opacity="0.55"/>
+      </svg>
+      <h1 class="font-display font-semibold text-base sm:text-lg whitespace-nowrap">Shelf<span class="text-brand">Quest</span></h1>
+    </div>
+
+    <div class="relative flex-1 max-w-md hidden sm:block">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M21 21l-3.8-3.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input id="searchInput" type="text" placeholder="Search books…"
+        class="w-full bg-panel border border-edge focus:border-brand/60 rounded-full pl-10 pr-4 py-2 text-sm outline-none transition-colors placeholder:text-slate-500" />
+    </div>
+
+    <button id="favBtn" class="flex items-center gap-1.5 rounded-full bg-brand border border-brand text-white text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z"/></svg>
+      Favorites <span id="favCount">(5)</span>
+    </button>
+  </div>
+  <div class="sm:hidden px-4 pb-3 relative">
+    <svg class="absolute left-7 top-1/2 -translate-y-1/2 text-slate-500" width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M21 21l-3.8-3.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <input type="text" placeholder="Search books…"
+      class="w-full bg-panel border border-edge rounded-full pl-10 pr-4 py-2 text-sm outline-none placeholder:text-slate-500" />
+  </div>
+</header>
+
+<section class="max-w-5xl mx-auto px-4 pt-12 pb-6 text-center">
+  <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight mb-3">
+    Your Next Book <span class="text-brand">Awaits</span>
+  </h2>
+  <p class="text-sm sm:text-base text-slate-400 max-w-md mx-auto">
+    Explore millions of titles across genres, analyze ratings, and curate your personal favorite library collections.
+  </p>
+</section>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 space-y-16">
+
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-base sm:text-lg font-semibold">Results</h3>
+      <p id="resultCount" class="text-xs text-slate-500">8 books found</p>
+    </div>
+
+    <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-600 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b01" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">The Marrow Atlas</h4>
+          <p class="text-xs text-slate-400 mb-1">Foster Lindqvist</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★☆ <span class="text-slate-500">4.6</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A surgeon maps a body that keeps growing new, uncharted organs.</p>
+          <button data-detail="b01" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-amber-900 via-amber-800 to-orange-600 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b02" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="text-danger"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">Paper Tide</h4>
+          <p class="text-xs text-slate-400 mb-1">Selin Marchetti</p>
+          <p class="text-amber-400 text-xs mb-2">★★★☆☆ <span class="text-slate-500">3.5</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A librarian finds overdue notices for books that were never checked out.</p>
+          <button data-detail="b02" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-purple-900 via-purple-800 to-fuchsia-600 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b03" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">The Glass Apiary</h4>
+          <p class="text-xs text-slate-400 mb-1">Wren Castellan</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★☆ <span class="text-slate-500">4.0</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A beekeeper's hives start producing glass instead of honey.</p>
+          <button data-detail="b03" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-slate-800 via-slate-700 to-red-700 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b04" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">Nine Days of Frost</h4>
+          <p class="text-xs text-slate-400 mb-1">Calla Vesik</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★☆ <span class="text-slate-500">4.5</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A detective has nine days before the case freezes for good.</p>
+          <button data-detail="b04" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-700 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b05" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="text-danger"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">The Cartographer's Oath</h4>
+          <p class="text-xs text-slate-400 mb-1">Mira Solenne</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★★ <span class="text-slate-500">4.8</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A mapmaker discovers borders that move when no one is looking.</p>
+          <button data-detail="b05" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-cyan-900 via-cyan-800 to-teal-600 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b06" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">Static Bloom</h4>
+          <p class="text-xs text-slate-400 mb-1">Idris Achebe</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★☆ <span class="text-slate-500">4.0</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A gardener tends the last greenhouse on a dying signal relay.</p>
+          <button data-detail="b06" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-rose-900 via-rose-800 to-pink-700 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b07" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">Ferrous Hearts</h4>
+          <p class="text-xs text-slate-400 mb-1">Dalen Okoro</p>
+          <p class="text-amber-400 text-xs mb-2">★★★☆☆ <span class="text-slate-500">3.5</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A blacksmith and an engineer rebuild a bridge, and each other.</p>
+          <button data-detail="b07" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+      <article class="group bg-card border border-edge/80 rounded-xl overflow-hidden flex flex-col hover:border-brand/40 transition-colors">
+        <div class="relative aspect-[2/3] bg-gradient-to-br from-sky-900 via-sky-800 to-cyan-700 flex items-center justify-center">
+          <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+          <button data-fav="b08" class="favToggle absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 backdrop-blur flex items-center justify-center hover:bg-black/55">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 20.5s-7.5-4.6-9.5-9.2C1.4 8.4 3 5.5 6 5c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3 .5 4.6 3.4 3.5 6.3-2 4.6-9.5 9.2-9.5 9.2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+        <div class="p-3 flex flex-col flex-1">
+          <h4 class="font-display text-sm font-semibold leading-snug line-clamp-2 mb-0.5">Whistling Fathoms</h4>
+          <p class="text-xs text-slate-400 mb-1">Lior Sand</p>
+          <p class="text-amber-400 text-xs mb-2">★★★★☆ <span class="text-slate-500">4.5</span></p>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-3 flex-1">A diver follows a sound the ocean shouldn't be able to make.</p>
+          <button data-detail="b08" class="detailBtn w-full rounded-lg bg-brand/90 hover:bg-brand text-white text-xs font-semibold py-2 transition-colors">View Details</button>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="loadingState" class="hidden">
+    <h3 class="font-display text-base sm:text-lg font-semibold mb-4">Live Search</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+      <div class="bg-card border border-edge/80 rounded-xl overflow-hidden">
+        <div class="aspect-[2/3] skeleton"></div>
+        <div class="p-3 space-y-2">
+          <div class="h-3 w-3/4 rounded skeleton"></div>
+          <div class="h-2.5 w-1/2 rounded skeleton"></div>
+          <div class="h-7 w-full rounded-lg skeleton mt-2"></div>
+        </div>
+      </div>
+      <div class="bg-card border border-edge/80 rounded-xl overflow-hidden">
+        <div class="aspect-[2/3] skeleton"></div>
+        <div class="p-3 space-y-2">
+          <div class="h-3 w-3/4 rounded skeleton"></div>
+          <div class="h-2.5 w-1/2 rounded skeleton"></div>
+          <div class="h-7 w-full rounded-lg skeleton mt-2"></div>
+        </div>
+      </div>
+      <div class="bg-card border border-edge/80 rounded-xl overflow-hidden">
+        <div class="aspect-[2/3] skeleton"></div>
+        <div class="p-3 space-y-2">
+          <div class="h-3 w-3/4 rounded skeleton"></div>
+          <div class="h-2.5 w-1/2 rounded skeleton"></div>
+          <div class="h-7 w-full rounded-lg skeleton mt-2"></div>
+        </div>
+      </div>
+      <div class="bg-card border border-edge/80 rounded-xl overflow-hidden hidden sm:block">
+        <div class="aspect-[2/3] skeleton"></div>
+        <div class="p-3 space-y-2">
+          <div class="h-3 w-3/4 rounded skeleton"></div>
+          <div class="h-2.5 w-1/2 rounded skeleton"></div>
+          <div class="h-7 w-full rounded-lg skeleton mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="emptyState" class="hidden">
+    <div class="flex flex-col items-center justify-center text-center py-20 border border-dashed border-edge rounded-2xl bg-panel/40">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="text-slate-500 mb-4">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M21 21l-3.8-3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <p class="font-display text-lg font-semibold mb-1">Empty State</p>
+      <p class="text-sm text-slate-500">No results found for "<span id="emptyQuery">your search</span>".<br/>Try another term.</p>
+    </div>
+  </section>
+
+  <section id="errorState" class="hidden space-y-4">
+    <div class="bg-danger/10 border border-danger/40 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+      <p class="text-sm text-rose-300">Error fetching data from <span class="font-medium">[Google Books API]</span>. Please try again.</p>
+      <button id="retryBtn" class="shrink-0 rounded-full bg-danger/20 border border-danger/50 text-rose-200 text-xs font-medium px-3 py-1.5 hover:bg-danger/30">Retry</button>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 opacity-50">
+      <article class="bg-card border border-edge/80 rounded-xl overflow-hidden">
+        <div class="aspect-[2/3] bg-gradient-to-br from-purple-900 to-fuchsia-700"></div>
+        <div class="p-3"><p class="text-xs text-slate-400">Couldn't load details</p></div>
+      </article>
+      <article class="bg-card border border-edge/80 rounded-xl overflow-hidden">
+        <div class="aspect-[2/3] bg-gradient-to-br from-slate-800 to-red-700"></div>
+        <div class="p-3"><p class="text-xs text-slate-400">Couldn't load details</p></div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-edge/60 py-6 text-center text-xs text-slate-500">
+ © 2026 ShelfQuest Team
+</footer> 
+
+<div id="modalOverlay" class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modalPanel" class="w-full sm:max-w-2xl bg-panel border border-edge rounded-t-3xl sm:rounded-2xl max-h-[92vh] overflow-y-auto relative">
+    <button id="modalClose" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-deep/70 border border-edge flex items-center justify-center hover:border-brand/50">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5 5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="grid sm:grid-cols-[180px_1fr] gap-0 sm:gap-6 p-5 sm:p-7">
+      <div id="modalCover" class="aspect-[2/3] rounded-xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-700 flex items-center justify-center mb-4 sm:mb-0">
+        <span class="font-display text-xs text-white/70 px-3 text-center">Cover art<br/>placeholder</span>
+      </div>
+
+      <div>
+        <h3 id="modalTitle" class="font-display text-xl sm:text-2xl font-semibold mb-1"></h3>
+        <p id="modalRating" class="text-amber-400 text-sm mb-3"></p>
+        <p id="modalDesc" class="text-sm leading-relaxed text-slate-300 mb-5"></p>
+
+        <div class="space-y-1.5 text-sm mb-6">
+          <p><span class="text-slate-500">Author:</span> <span id="modalAuthor"></span></p>
+          <p><span class="text-slate-500">Genre:</span> <span id="modalGenre"></span></p>
+          <p><span class="text-slate-500">Pages:</span> <span id="modalPages"></span></p>
+          <p><span class="text-slate-500">Published:</span> <span id="modalPublished"></span></p>
+        </div>
+
+        <div class="flex gap-3">
+          <button id="modalCloseBtn" class="flex-1 rounded-lg border border-edge text-slate-200 text-sm font-medium py-2.5 hover:border-slate-500 transition-colors">Close</button>
+          
+          <button id="modalFavBtn" class="flex-1 rounded-lg bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 transition-colors">Add to Favorites</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const overlay   = document.getElementById('modalOverlay');
+  const modalCover= document.getElementById('modalCover');
+
+  function openModal(bookId) {
+    const b = BOOKS[bookId];
+    if (!b) return;
+
+    document.getElementById('modalTitle').textContent     = b.title;
+    document.getElementById('modalRating').innerHTML      = `${b.rating} <span class="text-slate-500">${b.ratingNum}</span>`;
+    document.getElementById('modalDesc').textContent      = b.description;
+    document.getElementById('modalAuthor').textContent    = b.author;
+    document.getElementById('modalGenre').textContent     = b.genre;
+    document.getElementById('modalPages').textContent     = b.pages;
+    document.getElementById('modalPublished').textContent = b.published;
+
+    modalCover.className = `aspect-[2/3] rounded-xl bg-gradient-to-br ${b.gradient} flex items-center justify-center mb-4 sm:mb-0`;
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.detailBtn').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.detail));
+  });
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+
+</body>
+</html>
