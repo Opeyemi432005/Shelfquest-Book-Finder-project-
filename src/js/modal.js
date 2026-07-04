@@ -1,7 +1,14 @@
  //src/js/modal.js
 
+ import { toggleFavorite, isFavorite } from "./storage.js";
+ import { updateFavoriteCount } from "./main.js";
+
  const overlay = document.getElementById("modalOverlay");
 const modalCover = document.getElementById("modalCover");
+const modalFavBtn = document.getElementById("modalFavBtn");
+
+
+let currentBook = null;
 
 /**
  * Opens the modal and fills it with book information.
@@ -9,6 +16,11 @@ const modalCover = document.getElementById("modalCover");
  */
  export function openModal(book) {
    if (!book) return;
+
+   currentBook = book;
+   modalFavBtn.textContent = isFavorite(book.id)
+  ? "Remove from Favorites"
+  : "Add to Favorites";
 
    document.getElementById("modalTitle").textContent =
      book.title;
@@ -75,3 +87,15 @@ const modalCover = document.getElementById("modalCover");
      closeModal();
    }
  });
+
+ modalFavBtn.addEventListener("click", () => {
+  if (!currentBook) return;
+
+  toggleFavorite(currentBook);
+
+    document.dispatchEvent(new CustomEvent("favoritesUpdated"));
+
+  modalFavBtn.textContent = isFavorite(currentBook.id)
+    ? "Remove from Favorites"
+    : "Add to Favorites";
+});

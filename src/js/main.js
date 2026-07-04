@@ -1,6 +1,13 @@
 import { searchBooks } from "./api.js";
 import { openModal } from "./modal.js";
+import {
+  toggleFavorite,
+  isFavorite,
+  getFavorites,
+} from "./storage.js";
 
+
+const favCount = document.getElementById("favCount");
 const searchInput = document.getElementById("searchInput");
 const resultsGrid = document.getElementById("grid");
 const resultCount = document.getElementById("resultCount");
@@ -10,6 +17,16 @@ const emptyState = document.getElementById("emptyState");
 const errorState = document.getElementById("errorState");
 
 let currentBooks = [];
+
+export function updateFavoriteCount() {
+  favCount.textContent = `(${getFavorites().length})`;
+}
+
+updateFavoriteCount();
+
+document.addEventListener("favoritesUpdated", () => {
+  updateFavoriteCount();
+});
 
 function showState(state) {
   loadingState.classList.add("hidden");
